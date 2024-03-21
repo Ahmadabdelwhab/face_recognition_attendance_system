@@ -3,3 +3,5 @@ tempCodeRunnerFile.py
 *.jpeg
 *.jpg
 testing.py
+.Ds_Store
+.env

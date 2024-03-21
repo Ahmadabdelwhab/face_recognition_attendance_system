@@ -1,113 +1,12 @@
-from PIL import Image
 import numpy as np
-import sqlite3
 import cv2
-import os
 from deepface import DeepFace
-from typing import List, Tuple , Dict  ,Any
+from typing import List, Tuple, Dict, Set,Any
 import json
-### create sqlite3 database and table for emplpyoees
-DATABASE_URL = "./database/face_recognition.db"
-
-#### data base functions ###################
-def create_employee_table():
-    """
-    Creates the 'attendance' table in the database if it doesn't exist.
-    The table stores the attendance records of employees, including their ID, date of day, time in, and last seen time.
-    """
-    conn = sqlite3.connect(DATABASE_URL)
-    c = conn.cursor()
-    c.execute('''
-                CREATE TABLE IF NOT EXISTS employee (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    name TEXT NOT NULL,
-                    embedding TEXT NOT NULL
-                )
-                ''')
-    conn.commit()
-    conn.close()
-def create_attendance_table(connection:sqlite3.Connection):
-    """
-    Creates the 'attendance' table in the database if it doesn't exist.
-
-    Args:
-        connection (sqlite3.Connection): The SQLite database connection object.
-
-    Returns:
-        None
-    """
-
-    conn = connection
-    c = conn.cursor()
-    c.execute('''
-                CREATE TABLE IF NOT EXISTS attendance (
-                    employee_id INTEGER,
-                    date_of_day DATE DEFAULT (DATE(CURRENT_TIMESTAMP)),
-                    time_in TIME DEFAULT (TIME(CURRENT_TIMESTAMP)),
-                    last_seen TIME DEFAULT (TIME(CURRENT_TIMESTAMP)),
-                    UNIQUE(employee_id, date_of_day),
-                    FOREIGN KEY(employee_id) REFERENCES employees(id)
-                )
-                ''')
-    conn.commit()
-def add_user(name:str , embedding:str , connection:sqlite3.Connection):
-    """
-    Add a new user to the employees table in the database.
-
-    Args:
-        name (str): The name of the user.
-        embedding (str): The embedding of the user.
-        connection (sqlite3.Connection): The connection to the SQLite database.
-
-    Returns:
-        None
-    """
-    conn = connection
-    c = conn.cursor()
-    c.execute("INSERT INTO employees (name, embedding) VALUES (?, ?)", (name, embedding))
-    conn.commit()
-def get_employees(connection: sqlite3.Connection) -> Tuple[List[int | str]]:
-    """
-    Retrieve a list of employees from the database.
-
-    Args:
-        connection (sqlite3.Connection): The connection to the SQLite database.
-
-    Returns:
-        Tuple[List[int | str]]: A tuple containing a list of employee records. Each record is a tuple
-        containing the employee's ID (int), name (str), and embedding (str).
-        
-    """
-    conn = connection
-    c = conn.cursor()
-    c.execute("SELECT id, name, embedding FROM employees")
-    rows = c.fetchall()
-    return rows
-def add_attendance(employee_id: int, connection: sqlite3.Connection):
-    """
-    Records the attendance of an employee.
-
-    Args:
-        employee_id (int): The ID of the employee.
-        connection (sqlite3.Connection): The connection to the SQLite database.
-
-    Returns:
-        None
-    """
-    c = connection.cursor()
-    # Check if an attendance record for the employee and the current date already exists
-    c.execute("SELECT * FROM attendance WHERE employee_id = ? AND date_of_day = DATE(CURRENT_TIMESTAMP)", (employee_id,))
-    result = c.fetchone()
-    # If the record exists, update the last_seen field
-    if result is not None:
-        c.execute("UPDATE attendance SET last_seen = TIME(CURRENT_TIMESTAMP) WHERE employee_id = ? AND date_of_day = DATE(CURRENT_TIMESTAMP)", (employee_id,))
-    # If the record doesn't exist, insert a new one
-    else:
-        c.execute("INSERT INTO attendance (employee_id, date_of_day, time_in, last_seen) VALUES (?, DATE(CURRENT_TIMESTAMP), TIME(CURRENT_TIMESTAMP), TIME(CURRENT_TIMESTAMP))", (employee_id,))
-    connection.commit()
-############################################
 
 #### pre-processing functions ##############
+
+
 def str_to_np_ndarray(s: str) -> np.ndarray:
     """
     Convert a string representation of a list to a NumPy ndarray.
@@ -125,7 +24,9 @@ def str_to_np_ndarray(s: str) -> np.ndarray:
     list_embedding = json.loads(s)
     embedding = np.array(list_embedding)
     return embedding
-def load_employees(employees: Tuple[List[int|str]]) -> Dict[int, List[str|np.ndarray]]:
+
+
+def load_employees(employees: Tuple[List[int | str]]) -> Dict[int, List[str | np.ndarray]]:
     """
     Load employees' information into a dictionary.
 
@@ -144,6 +45,8 @@ def load_employees(employees: Tuple[List[int|str]]) -> Dict[int, List[str|np.nda
         embedding = str_to_np_ndarray(str_embedding)
         employees_dict[id] = [name, embedding]
     return employees_dict
+
+
 def np_ndarrray_to_str(embedding: np.ndarray) -> str:
     """
     Convert a NumPy ndarray to a string representation.
@@ -158,15 +61,16 @@ def np_ndarrray_to_str(embedding: np.ndarray) -> str:
     str_embedding = json.dumps(list_embedding)
     return str_embedding
 
-############################################
 
+############################################
 #### face recognition functions ############
 MODEL_NAME = "Facenet"
 FACE_DETECTOR_FAST = "opencv"
 FACE_DETECTOR_SLOW = "mtcnn"
 FACE_NORMALIZER = "Facenet"
 
-def get_embeddings(frame: np.ndarray, model_name: str = MODEL_NAME, face_detector: str = FACE_DETECTOR_FAST ,face_normalizer=FACE_NORMALIZER ) -> List[Dict[str  , Any]]:
+
+def get_embeddings(frame: np.ndarray, model_name: str = MODEL_NAME, face_detector: str = FACE_DETECTOR_FAST, face_normalizer=FACE_NORMALIZER) -> List[Dict[str, Any]]:
     """
     Extracts facial embeddings from a given frame using a specified model.
 
@@ -185,22 +89,25 @@ def get_embeddings(frame: np.ndarray, model_name: str = MODEL_NAME, face_detecto
     """
     try:
         deef_face_embeddings = DeepFace.represent(frame,
-                                        model_name=model_name ,
-                                        detector_backend=face_detector ,
-                                        normalization=face_normalizer)
-        def process_embeddings(embedding:Dict[str  , Any]) -> List[Dict[str ,str | Tuple[int] |float , np.ndarray]]:
+                                                model_name=model_name,
+                                                detector_backend=face_detector,
+                                                normalization=face_normalizer)
+
+        def process_embeddings(embedding: Dict[str, Any]) -> List[Dict[str, str | Tuple[int] | float, np.ndarray]]:
             processed_embeddings = {}
-            processed_embeddings["box"] = (embedding["facial_area"]["x"] , embedding["facial_area"]["y"] , embedding["facial_area"]["w"] , embedding["facial_area"]["h"])
+            processed_embeddings["box"] = (embedding["facial_area"]["x"], embedding["facial_area"]["y"], embedding["facial_area"]["w"], embedding["facial_area"]["h"])
             processed_embeddings["embedding"] = np.array(embedding["embedding"])
             processed_embeddings["confidence"] = embedding["face_confidence"]
             return processed_embeddings
-        embeddings = [process_embeddings(embedding) for embedding in deef_face_embeddings]
+        embeddings = [process_embeddings(embedding)for embedding in deef_face_embeddings]
     except ValueError as e:
         print("No Face Found")
         return None
     except Exception as e:
         raise e
     return embeddings
+
+
 def compare_embeddings_cosine_similarity(embedding1: np.ndarray, embedding2: np.ndarray) -> float:
     """
     Compare two embedding vectors using the cosine similarity metric.
@@ -212,9 +119,12 @@ def compare_embeddings_cosine_similarity(embedding1: np.ndarray, embedding2: np.
     Returns:
         float: The cosine similarity between the two embedding vectors.
     """
-    similarity = np.dot(embedding1, embedding2) / (np.linalg.norm(embedding1) * np.linalg.norm(embedding2))
+    similarity = np.dot(embedding1, embedding2) / \
+        (np.linalg.norm(embedding1) * np.linalg.norm(embedding2))
     return similarity
-def recognize_face(embedding: np.ndarray, employees: Dict[int, List[str|np.ndarray]], threshold: float = 0.7) -> Tuple[int, str, float]:
+
+
+def recognize_face(embedding: np.ndarray, employees: Dict[int, List[str | np.ndarray]], threshold: float = 0.7) -> Tuple[int, str, float]:
     """
     Recognize a face by comparing its embedding to the embeddings of known employees.
 
@@ -229,7 +139,8 @@ def recognize_face(embedding: np.ndarray, employees: Dict[int, List[str|np.ndarr
     max_similarity = -1
     recognized_employee_id = -1
     for id, (name, employee_embedding) in employees.items():
-        similarity = compare_embeddings_cosine_similarity(embedding, employee_embedding)
+        similarity = compare_embeddings_cosine_similarity(
+            embedding, employee_embedding)
         if similarity > max_similarity:
             max_similarity = similarity
             recognized_employee_id = id
@@ -237,8 +148,10 @@ def recognize_face(embedding: np.ndarray, employees: Dict[int, List[str|np.ndarr
     if max_similarity > threshold:
         return recognized_employee_id, recognized_employee_name, max_similarity
     else:
-        return -1, "Unknown", max_similarity
-def draw_rectangle(frame:np.ndarray ,id , name , box:Tuple[int,int,int,int] , color:Tuple[int,int,int] = (0,255,0) , thickness:int = 2):
+        return -1, "Unknown", 0
+
+
+def draw_rectangle(frame: np.ndarray, id, name, box: Tuple[int, int, int, int], color: Tuple[int, int, int] = (0, 255, 0), thickness: int = 2):
     """
     Draw a rectangle around a face in a frame.
 
@@ -253,5 +166,31 @@ def draw_rectangle(frame:np.ndarray ,id , name , box:Tuple[int,int,int,int] , co
     """
     x, y, w, h = box
     cv2.rectangle(frame, (x, y), (x + w, y + h), color, thickness)
-    cv2.putText(frame, name, (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.7, color, thickness)
+    cv2.putText(frame, name, (x, y - 10),
+                cv2.FONT_HERSHEY_SIMPLEX, 0.7, color, thickness)
     return frame
+
+
+def process_frame(frame: np.ndarray, employees: Dict[int, List[str | np.ndarray]]) -> Tuple[np.ndarray | Set[int]]:
+    """
+    Process a frame of an image to recognize faces and return the frame with drawn rectangles around recognized faces.
+
+    Args:
+        frame (np.ndarray): The input frame of an image.
+        employees (Dict[int, List[str | np.ndarray]]): A dictionary containing employee IDs as keys and a list of their names and embeddings as values.
+
+    Returns:
+        Tuple[np.ndarray | Set[int]]: A tuple containing the processed frame with drawn rectangles around recognized faces and a set of recognized employee IDs.
+    """
+    set_of_ids = set()
+    embeddings = get_embeddings(frame)
+    if embeddings is None:
+        return frame, None
+    for embedding in embeddings:
+        id, name, simlarity = recognize_face(embedding["embedding"], employees)
+        if id != -1:
+            set_of_ids.add(id)
+        box_color = (int(255 * (1-simlarity)), 0, int(255 * simlarity))
+        draw_rectangle(frame, id, name, embedding["box"], color=box_color)
+    return frame, set_of_ids
+
