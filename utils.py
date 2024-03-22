@@ -70,7 +70,7 @@ FACE_DETECTOR_SLOW = "mtcnn"
 FACE_NORMALIZER = "Facenet"
 
 
-def get_embeddings(frame: np.ndarray, model_name: str = MODEL_NAME, face_detector: str = FACE_DETECTOR_SLOW, face_normalizer=FACE_NORMALIZER) -> List[Dict[str, Any]]:
+def get_embeddings(frame: np.ndarray, model_name: str = MODEL_NAME, face_detector: str = FACE_DETECTOR_FAST, face_normalizer=FACE_NORMALIZER) -> List[Dict[str, Any]]:
     """
     Extracts facial embeddings from a given frame using a specified model.
 
@@ -148,7 +148,7 @@ def recognize_face(embedding: np.ndarray, employees: Dict[int, List[str | np.nda
     if max_similarity > threshold:
         return recognized_employee_id, recognized_employee_name, max_similarity
     else:
-        return -1, "Unknown", 0
+        return -1, "Unknown", max_similarity
 
 def draw_rectangle(frame: np.ndarray, confidence, name, box: Tuple[int, int, int, int], color: Tuple[int, int, int] = (0, 255, 0), thickness: int = 2):
     """

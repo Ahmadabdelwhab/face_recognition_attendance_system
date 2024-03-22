@@ -3,7 +3,7 @@ from typing import List, Tuple ,Dict , Any
 
 class FacesDB:
     def __init__(self , db_path:str):
-        self.conn = sqlite3.connect(db_path)
+        self.conn = sqlite3.connect(db_path , check_same_thread=False)
     def create_employee_table(self):
         """
         Creates the 'attendance' table in the database if it doesn't exist.
