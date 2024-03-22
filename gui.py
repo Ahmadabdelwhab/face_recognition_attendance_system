@@ -103,6 +103,8 @@ class RegisterPage(tk.Frame):
         button1 = tk.Button(self, text="Back to Home",
                             command=lambda: controller.show_frame(StartPage))
         button1.pack()
-
-app = Application()
-app.mainloop()
+def main():
+    app = Application()
+    app.mainloop()
+if __name__ == "__main__":
+    main()
