@@ -70,7 +70,7 @@ FACE_DETECTOR_SLOW = "mtcnn"
 FACE_NORMALIZER = "Facenet"
 
 
-def get_embeddings(frame: np.ndarray, model_name: str = MODEL_NAME, face_detector: str = FACE_DETECTOR_FAST, face_normalizer=FACE_NORMALIZER) -> List[Dict[str, Any]]:
+def get_embeddings(frame: np.ndarray, model_name: str = MODEL_NAME, face_detector: str = FACE_DETECTOR_SLOW, face_normalizer=FACE_NORMALIZER) -> List[Dict[str, Any]]:
     """
     Extracts facial embeddings from a given frame using a specified model.
 
@@ -124,7 +124,7 @@ def compare_embeddings_cosine_similarity(embedding1: np.ndarray, embedding2: np.
     return similarity
 
 
-def recognize_face(embedding: np.ndarray, employees: Dict[int, List[str | np.ndarray]], threshold: float = 0.7) -> Tuple[int, str, float]:
+def recognize_face(embedding: np.ndarray, employees: Dict[int, List[str | np.ndarray]], threshold: float = 0.75) -> Tuple[int, str, float]:
     """
     Recognize a face by comparing its embedding to the embeddings of known employees.
 
@@ -150,8 +150,7 @@ def recognize_face(embedding: np.ndarray, employees: Dict[int, List[str | np.nda
     else:
         return -1, "Unknown", 0
 
-
-def draw_rectangle(frame: np.ndarray, id, name, box: Tuple[int, int, int, int], color: Tuple[int, int, int] = (0, 255, 0), thickness: int = 2):
+def draw_rectangle(frame: np.ndarray, confidence, name, box: Tuple[int, int, int, int], color: Tuple[int, int, int] = (0, 255, 0), thickness: int = 2):
     """
     Draw a rectangle around a face in a frame.
 
@@ -166,7 +165,7 @@ def draw_rectangle(frame: np.ndarray, id, name, box: Tuple[int, int, int, int], 
     """
     x, y, w, h = box
     cv2.rectangle(frame, (x, y), (x + w, y + h), color, thickness)
-    cv2.putText(frame, name, (x, y - 10),
+    cv2.putText(frame, name  +  F" , {confidence:.2f}", (x, y - 10),
                 cv2.FONT_HERSHEY_SIMPLEX, 0.7, color, thickness)
     return frame
 
@@ -190,7 +189,7 @@ def process_frame(frame: np.ndarray, employees: Dict[int, List[str | np.ndarray]
         id, name, simlarity = recognize_face(embedding["embedding"], employees)
         if id != -1:
             set_of_ids.add(id)
-        box_color = (int(255 * (1-simlarity)), 0, int(255 * simlarity))
-        draw_rectangle(frame, id, name, embedding["box"], color=box_color)
+        box_color = (0, int(255 * simlarity) , int(255 * (1-simlarity)))
+        draw_rectangle(frame, simlarity, name, embedding["box"], color=box_color)
     return frame, set_of_ids
 
