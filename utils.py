@@ -88,18 +88,18 @@ def get_embeddings(frame: np.ndarray, model_name: str = MODEL_NAME, face_detecto
         Exception: If an error occurs during the embedding extraction process.
     """
     try:
-        deef_face_embeddings = DeepFace.represent(frame,
+        deep_face_embeddings = DeepFace.represent(frame,
                                                 model_name=model_name,
                                                 detector_backend=face_detector,
                                                 normalization=face_normalizer)
 
-        def process_embeddings(embedding: Dict[str, Any]) -> List[Dict[str, str | Tuple[int] | float, np.ndarray]]:
+        def process_embeddings(embedding: Dict[str, Any]) -> List[Dict[str, str | Tuple[int] | float| np.ndarray]]:
             processed_embeddings = {}
             processed_embeddings["box"] = (embedding["facial_area"]["x"], embedding["facial_area"]["y"], embedding["facial_area"]["w"], embedding["facial_area"]["h"])
             processed_embeddings["embedding"] = np.array(embedding["embedding"])
             processed_embeddings["confidence"] = embedding["face_confidence"]
             return processed_embeddings
-        embeddings = [process_embeddings(embedding)for embedding in deef_face_embeddings]
+        embeddings = [process_embeddings(embedding)for embedding in deep_face_embeddings]
     except ValueError as e:
         print("No Face Found")
         return None

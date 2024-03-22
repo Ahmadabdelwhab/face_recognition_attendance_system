@@ -56,7 +56,7 @@ class FacesDB:
         """
         
         c = self.conn.cursor()
-        c.execute("INSERT INTO employees (name, embedding) VALUES (?, ?)", (name, embedding))
+        c.execute("INSERT INTO employee (name, embedding) VALUES (?, ?)", (name, embedding))
         self.conn.commit()
     def get_employees(self) -> Tuple[List[int | str]]:
         """
@@ -72,7 +72,7 @@ class FacesDB:
         """
 
         c = self.conn.cursor()
-        c.execute("SELECT id, name, embedding FROM employees")
+        c.execute("SELECT id, name, embedding FROM employee")
         rows = c.fetchall()
         return rows
     def add_attendance(self ,employee_id: int):
@@ -97,6 +97,32 @@ class FacesDB:
         else:
             c.execute("INSERT INTO attendance (employee_id, date_of_day, time_in, last_seen) VALUES (?, DATE(CURRENT_TIMESTAMP), TIME(CURRENT_TIMESTAMP), TIME(CURRENT_TIMESTAMP))", (employee_id,))
         self.conn.commit()
+    def get_attendance(self) -> Tuple[List[int | str]]:
+        """"""
+        c = self.conn.cursor()
+        c.execute("""SELECT * FROM attendance
+                    SORT BY date_of_day DESC, last_seen DESC
+                    """)
+        rows = c.fetchall()
+        return rows
+    def get_employee_attendance(self ,employee_id:int) -> Tuple[List[int | str]]:
+        """"""
+        c = self.conn.cursor()
+        c.execute("""SELECT * FROM attendance
+                    WHERE employee_id = ?
+                    SORT BY date_of_day DESC, last_seen DESC
+                    """, (employee_id,))
+        rows = c.fetchall()
+        return rows
+    def get_attendance_by_date(self ,date:str) -> Tuple[List[int | str]]:
+        """"""
+        c = self.conn.cursor()
+        c.execute("""SELECT * FROM attendance
+                    WHERE date_of_day = ?
+                    SORT BY date_of_day DESC, last_seen DESC
+                    """, (date,))
+        rows = c.fetchall()
+        return rows
     def close_connection(self):
         """
         Close the connection to the database.

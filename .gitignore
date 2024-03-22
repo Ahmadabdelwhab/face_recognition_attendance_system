@@ -5,3 +5,5 @@ tempCodeRunnerFile.py
 testing.py
 .Ds_Store
 .env
+__pycache__
+*.png
