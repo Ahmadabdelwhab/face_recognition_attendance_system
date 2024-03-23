@@ -44,10 +44,10 @@ env/Scripts/Activate.ps1 //In Powershel
 
 after activating your virtual environment, you can install the project requirements using pip. Navigate to the project directory and run the following command:
 
-```
+```bash
     pip install -r requirements.txt
-```
-## Usage
+``` 
+## Usage 
 
 Run the `gui.py` file
 

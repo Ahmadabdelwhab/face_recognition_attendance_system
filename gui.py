@@ -1,4 +1,6 @@
 import tkinter as tk
+from tkinter import filedialog , messagebox
+from tkcalendar import DateEntry as calendar
 from PIL import Image, ImageTk
 import cv2
 import threading
@@ -39,8 +41,18 @@ class StartPage(tk.Frame):
         button2 = tk.Button(self, text="Register New Employee",
                             command=lambda: controller.show_frame(RegisterPage))
         button2.pack()
+        self.date_entry = calendar(self)
+        self.date_entry.pack()
+        export_button = tk.Button(self, text="Export Attendance", command=self.get_attendance)
+        export_button.pack()
         exit_button = tk.Button(self, text="Exit", command=self.exit_app)
         exit_button.pack()
+    def get_attendance(self):
+        date = str(self.date_entry.get_date())
+        attendance = self.controller.recording_page.db.get_employees_attendance_by_date(date)
+        date_for_path = date.replace("-" , ".")
+        csv_path = f"attendance_{date_for_path}.csv"
+        attendance.to_csv(csv_path, index=False)
     def exit_app(self):
         self.controller.recording_page.db.close_connection()  # Close the database connection
         self.quit() 
@@ -98,11 +110,43 @@ class RecordingPage(tk.Frame):
 class RegisterPage(tk.Frame):
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
-        label = tk.Label(self, text="Register Page")
-        label.pack(pady=10, padx=10)
-        button1 = tk.Button(self, text="Back to Home",
-                            command=lambda: controller.show_frame(StartPage))
-        button1.pack()
+        self.controller = controller  # Store the controller for later use
+        self.photo_path = tk.StringVar()  # Variable to store the photo path
+        self.name = tk.StringVar()  # Variable to store the name
+
+        name_label = tk.Label(self, text="Name:")
+        name_label.pack()
+
+        name_entry = tk.Entry(self, textvariable=self.name)
+        name_entry.pack()
+
+        browse_button = tk.Button(self, text="Browse", command=self.browse)
+        browse_button.pack()
+
+        register_button = tk.Button(self, text="Register", command=self.register)
+        register_button.pack()
+        path_label = tk.Label(self, textvariable=self.photo_path)
+        path_label.pack()
+        
+
+    def browse(self):
+        self.photo_path.set(filedialog.askopenfilename())  # Open the dialog and store the selected path
+
+    def register(self):
+        photo_path = self.photo_path.get()
+        name = self.name.get()
+        if photo_path and name:
+            img = cv2.imread(photo_path)
+            img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+            embedding = ut.get_embeddings(img)
+            if embedding is None:
+                messagebox.showinfo("Error", "No face detected in the image.")
+                return
+            embedding = embedding[0]["embedding"]
+            str_embedding = ut.np_ndarrray_to_str(embedding)
+            self.controller.recording_page.db.add_user(name, str_embedding)
+            print(f"Registered photo: {photo_path}, name: {name}")
+            self.photo_path.set('')
 def main():
     app = Application()
     app.mainloop()

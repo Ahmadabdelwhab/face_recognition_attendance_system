@@ -1,6 +1,6 @@
 import sqlite3
 from typing import List, Tuple ,Dict , Any
-
+import pandas as pd
 class FacesDB:
     def __init__(self , db_path:str):
         self.conn = sqlite3.connect(db_path , check_same_thread=False)
@@ -123,6 +123,14 @@ class FacesDB:
                     """, (date,))
         rows = c.fetchall()
         return rows
+    def get_employees_attendance_by_date(self , date:str) -> Tuple[List[int | str]]:
+        c = self.conn.cursor()
+        query = f"""SELECT  e.id  as ID, e.name as Name, COALESCE(a.time_in , "N/A") as CheckIn, COALESCE(a.last_seen , "N/A") as LastSeen
+                    FROM employee AS e
+                    LEFT JOIN attendance AS a on a.employee_id = e.id AND a.date_of_day = "{date}"
+                    
+                    """
+        return pd.read_sql_query(query , self.conn)
     def close_connection(self):
         """
         Close the connection to the database.
