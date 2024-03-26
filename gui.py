@@ -127,11 +127,14 @@ class RegisterPage(tk.Frame):
         register_button.pack()
         path_label = tk.Label(self, textvariable=self.photo_path)
         path_label.pack()
+        return_button = tk.Button(self, text="Return to Menu", command=self.return_to_menu)
+        return_button.pack()
         
 
     def browse(self):
         self.photo_path.set(filedialog.askopenfilename())  # Open the dialog and store the selected path
-
+    def return_to_menu(self):
+        self.controller.show_frame(StartPage)
     def register(self):
         photo_path = self.photo_path.get()
         name = self.name.get()
