@@ -90,8 +90,12 @@ class RecordingPage(tk.Frame):
     def video_capture(self):
         
         cap = cv2.VideoCapture(0)
+        image_width = cap.get(cv2.CAP_PROP_FRAME_WIDTH)
+        image_height = cap.get(cv2.CAP_PROP_FRAME_HEIGHT)
+        self.canvas.config(width=int(image_width * 0.9), height=int(image_height * 0.9))
         while self.recording:
             ret, frame = cap.read()
+            frame = cv2.resize(frame, (int(image_width * 0.9), int(image_height * 0.9)))
             if not ret:
                 break
             processed_frame , employees_ids = ut.process_frame(frame , self.employees)
@@ -100,9 +104,8 @@ class RecordingPage(tk.Frame):
                     self.db.add_attendance(employee_id)
                     print(f"Employee with ID {employee_id} has been recognized.")
             rgb_image = cv2.cvtColor(processed_frame, cv2.COLOR_BGR2RGB)
-            pil_img = Image.fromarray(rgb_image)# Resize the image to fit the canvas
-            pil_img_resized = pil_img.resize((1440, 810))
-            imgtk = ImageTk.PhotoImage(image=pil_img_resized)
+            pil_img = Image.fromarray(rgb_image)
+            imgtk = ImageTk.PhotoImage(image=pil_img)
             self.canvas.create_image(0, 0, anchor='nw', image=imgtk)
             self.canvas.image = imgtk
         cap.release()

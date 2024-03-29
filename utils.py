@@ -124,7 +124,7 @@ def compare_embeddings_cosine_similarity(embedding1: np.ndarray, embedding2: np.
     return similarity
 
 
-def recognize_face(embedding: np.ndarray, employees: Dict[int, List[str | np.ndarray]], threshold: float = 0.75) -> Tuple[int, str, float]:
+def recognize_face(embedding: np.ndarray, employees: Dict[int, List[str | np.ndarray]], threshold: float = 0.80) -> Tuple[int, str, float]:
     """
     Recognize a face by comparing its embedding to the embeddings of known employees.
 
