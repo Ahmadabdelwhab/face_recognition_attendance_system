@@ -1,4 +1,4 @@
-from streamlit_webrtc import webrtc_streamer
+from streamlit_webrtc import webrtc_streamer , MediaStreamConstraints
 from facesdb import FacesDB
 import utils as ut
 import os
@@ -16,9 +16,22 @@ class VideoProcessor:
     def recv(self , frame):
         # Process the frame here
         frm = frame.to_ndarray(format='bgr24')
+        print(frm.shape)
         processed_frame , employees_ids = ut.process_frame(frm , employees)
         if employees_ids:
             for employee_id in employees_ids:
                 db.add_attendance(employee_id)
+        # sleep(1)
         return av.VideoFrame.from_ndarray(processed_frame , format='bgr24')
-webrtc_streamer(key="key" , video_processor_factory=VideoProcessor )
+
+# Define the video constraints
+constraints = MediaStreamConstraints({
+        "video": {
+            "width": {"min": 640 , "ideal": 1280 , "max": 1920},
+            "height": {"min": 480 , "ideal": 720 , "max": 1080},
+            "frameRate": {"ideal": 24 , "max": 30 , "min": 15}
+        }
+    })
+webrtc_streamer(key="key" , video_processor_factory=VideoProcessor , rtc_configuration={  # Add this config
+        "iceServers": [{"urls": ["stun:stun.l.google.com:19302"]}]
+    }, media_stream_constraints=constraints )
