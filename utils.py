@@ -68,6 +68,7 @@ MODEL_NAME = "Facenet"
 FACE_DETECTOR_FAST = "opencv"
 FACE_DETECTOR_SLOW = "mtcnn"
 FACE_NORMALIZER = "Facenet"
+THRESHOLD = 0.8
 
 
 def get_embeddings(frame: np.ndarray, model_name: str = MODEL_NAME, face_detector: str = FACE_DETECTOR_FAST, face_normalizer=FACE_NORMALIZER) -> List[Dict[str, Any]]:
@@ -124,7 +125,7 @@ def compare_embeddings_cosine_similarity(embedding1: np.ndarray, embedding2: np.
     return similarity
 
 
-def recognize_face(embedding: np.ndarray, employees: Dict[int, List[str | np.ndarray]], threshold: float = 0.80) -> Tuple[int, str, float]:
+def recognize_face(embedding: np.ndarray, employees: Dict[int, List[str | np.ndarray]], threshold: float = THRESHOLD) -> Tuple[int, str, float]:
     """
     Recognize a face by comparing its embedding to the embeddings of known employees.
 
