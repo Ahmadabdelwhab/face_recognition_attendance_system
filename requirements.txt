@@ -1,2 +1,5 @@
 deepface==0.0.87
 tkcalendar==1.6.1
+streamlit==1.32.2
+streamlit-webrtc==0.47.6
+

@@ -21,4 +21,4 @@ class VideoProcessor:
             for employee_id in employees_ids:
                 db.add_attendance(employee_id)
         return av.VideoFrame.from_ndarray(processed_frame , format='bgr24')
-webrtc_streamer(key="key" , video_processor_factory=VideoProcessor)
+webrtc_streamer(key="key" , video_processor_factory=VideoProcessor )
