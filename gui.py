@@ -60,7 +60,7 @@ class RecordingPage(tk.Frame):
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
         self.controller = controller  # Store the controller for later use
-        self.canvas = tk.Canvas(self, width=1440, height=810)
+        self.canvas = tk.Canvas(self, width=100, height=100)
         self.canvas.pack(anchor='center')
         self.recording = False
         self.button1 = tk.Button(self, text="Start Recording",
