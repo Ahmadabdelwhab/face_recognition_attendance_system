@@ -92,10 +92,10 @@ class RecordingPage(tk.Frame):
         cap = cv2.VideoCapture(0)
         image_width = cap.get(cv2.CAP_PROP_FRAME_WIDTH)
         image_height = cap.get(cv2.CAP_PROP_FRAME_HEIGHT)
-        self.canvas.config(width=int(image_width * 0.9), height=int(image_height * 0.9))
+        self.canvas.config(width=int(image_width * 0.6), height=int(image_height * 0.6))
         while self.recording:
             ret, frame = cap.read()
-            frame = cv2.resize(frame, (int(image_width * 0.9), int(image_height * 0.9)))
+            frame = cv2.resize(frame, (int(image_width * 0.6), int(image_height * 0.6)))
             if not ret:
                 break
             processed_frame , employees_ids = ut.process_frame(frame , self.employees)
