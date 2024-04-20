@@ -1,7 +1,7 @@
 import tkinter as tk
-from recordingpageframe import RecordingPage
-from adminpanelframe import adminPanelPage
-from startpageframe import StartPage
+from .recordingpageframe import RecordingPage
+from .adminpanelframe import adminPanelPage
+from .startpageframe import StartPage
 DATABASE_URL = '../database/face_recognition.db'
 class MainApplication(tk.Tk):
     def __init__(self, *args, **kwargs):
