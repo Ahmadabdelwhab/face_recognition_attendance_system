@@ -1,5 +1,5 @@
 from facesdb import FacesDB
-import utils as ut
+import processing as ut
 import os
 from dotenv import load_dotenv
 import numpy as np

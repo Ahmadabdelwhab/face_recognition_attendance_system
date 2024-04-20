@@ -1,5 +1,5 @@
 import sqlite3
-from typing import List, Tuple ,Dict , Any
+from typing import List, Tuple ,Dict , Any # type: ignore
 import pandas as pd
 class FacesDB:
     def __init__(self , db_path:str):
@@ -131,6 +131,10 @@ class FacesDB:
                     
                     """
         return pd.read_sql_query(query , self.conn)
+    def delete_employee(self , employee_id:int):
+        c = self.conn.cursor()
+        c.execute("DELETE FROM employee WHERE id = ?", (employee_id,))
+        self.conn.commit()
     def close_connection(self):
         """
         Close the connection to the database.
@@ -142,3 +146,7 @@ class FacesDB:
             None
         """
         self.conn.close()
+def main():
+    pass
+if __name__ == "__main__":
+    main()

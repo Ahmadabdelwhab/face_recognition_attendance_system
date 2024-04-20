@@ -1,7 +1,7 @@
 import numpy as np
 import cv2
 from deepface import DeepFace
-from typing import List, Tuple, Dict, Set,Any
+from typing import List, Tuple, Dict, Set,Any # type: ignore
 import json
 
 #### pre-processing functions ##############
@@ -68,7 +68,7 @@ MODEL_NAME = "Facenet"
 FACE_DETECTOR_FAST = "opencv"
 FACE_DETECTOR_SLOW = "mtcnn"
 FACE_NORMALIZER = "Facenet"
-THRESHOLD = 0.8
+THRESHOLD = 0.75
 
 
 def get_embeddings(frame: np.ndarray, model_name: str = MODEL_NAME, face_detector: str = FACE_DETECTOR_FAST, face_normalizer=FACE_NORMALIZER) -> List[Dict[str, Any]]:
@@ -166,7 +166,7 @@ def draw_rectangle(frame: np.ndarray, confidence, name, box: Tuple[int, int, int
     """
     x, y, w, h = box
     cv2.rectangle(frame, (x, y), (x + w, y + h), color, thickness)
-    cv2.putText(frame, name  +  F" , {confidence:.2f}", (x, y - 10),
+    cv2.putText(frame, name , (x, y - 10),
                 cv2.FONT_HERSHEY_SIMPLEX, 0.7, color, thickness)
     return frame
 

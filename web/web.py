@@ -1,6 +1,9 @@
 from streamlit_webrtc import webrtc_streamer , MediaStreamConstraints
-from facesdb import FacesDB
-import utils as ut
+import os
+import sys
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from utils.facesdb import FacesDB
+import utils.processing as ut
 import os
 from dotenv import load_dotenv
 import av
