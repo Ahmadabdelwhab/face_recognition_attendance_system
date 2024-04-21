@@ -123,6 +123,28 @@ class FacesDB:
                     """, (date,))
         rows = c.fetchall()
         return rows
+    def get_employee_attendance_by_id(self , employee_id:str) -> pd.DataFrame:
+        query = f"""SELECT 
+                    all_dates.date_of_day,
+                    CASE 
+                        WHEN attendance.employee_id = {employee_id} THEN 'Present'
+                        ELSE 'Absent'
+                    END AS attendance_status,
+                    CASE 
+                        WHEN attendance.employee_id = {employee_id} THEN 
+                            ROUND((julianday(attendance.last_seen) - julianday(attendance.time_in)) * 24, 2)
+                        ELSE
+                            0
+                    END AS hours_worked
+                FROM
+                    (SELECT DISTINCT date_of_day FROM attendance) AS all_dates
+                LEFT JOIN
+                    attendance ON all_dates.date_of_day = attendance.date_of_day
+                ORDER BY
+                    all_dates.date_of_day;
+                    """
+        attendance_df= pd.read_sql_query(query , self.conn)
+        return attendance_df
     def get_employees_attendance_by_date(self , date:str) -> pd.DataFrame:
         query = f"""SELECT  e.id  as ID, e.name as Name, COALESCE(a.time_in , "N/A") as CheckIn, COALESCE(a.last_seen , "N/A") as LastSeen
                     FROM employee AS e

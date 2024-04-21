@@ -46,9 +46,10 @@ class adminPanelPage(tk.Frame):
         self.get_attendance_id = tk.StringVar()
         get_attendance_label = tk.Label(self, text="Emoplyee's ID:")
         get_attendance_label.pack()
-        get_attendance_entry = tk.Entry(self, textvariable=self.get_attendance_id)
-        get_attendance_entry.pack()
-        self.get_attendance_button = tk.Button(self, text="Get Attendance", command=None)
+        self.get_attendance_entry = tk.Entry(self, textvariable=self.get_attendance_id)
+        self.get_attendance_entry.pack()
+        self.get_attendance_button = tk.Button(self, text="Get Attendance", command=self.get_attendance_by_id)
+        self.get_attendance_button.pack()
         self.vertical_spacing()
         # Section: Delete employee by ID
         self.write_title("Delete Employee:")
@@ -124,4 +125,15 @@ class adminPanelPage(tk.Frame):
         attendance = self.controller.db.get_employees_attendance_by_date(date)
         date_for_path = date.replace("-" , ".")
         csv_path = filedialog.asksaveasfilename(defaultextension=".csv", filetypes=[("CSV files", "*.csv")], initialfile=f"attendance_{date_for_path}")
+        attendance.to_csv(csv_path, index=False)
+    def get_attendance_by_id(self):
+        id = str(self.get_attendance_entry.get())
+        if not id:
+            messagebox.showinfo("Error", "Please enter the employee ID.")
+            return
+        attendance = self.controller.db.get_employee_attendance_by_id(id)
+        if attendance.empty:
+            messagebox.showinfo("Error", f"No attendance records found for employee with ID: {id}")
+            return
+        csv_path = filedialog.asksaveasfilename(defaultextension=".csv", filetypes=[("CSV files", "*.csv")], initialfile=f"attendance_No_{id}")
         attendance.to_csv(csv_path, index=False)

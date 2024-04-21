@@ -7,3 +7,4 @@ testing.py
 .env
 __pycache__
 *.png
+test.py
