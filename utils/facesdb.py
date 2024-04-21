@@ -123,18 +123,23 @@ class FacesDB:
                     """, (date,))
         rows = c.fetchall()
         return rows
-    def get_employees_attendance_by_date(self , date:str) -> Tuple[List[int | str]]:
-        c = self.conn.cursor()
+    def get_employees_attendance_by_date(self , date:str) -> pd.DataFrame:
         query = f"""SELECT  e.id  as ID, e.name as Name, COALESCE(a.time_in , "N/A") as CheckIn, COALESCE(a.last_seen , "N/A") as LastSeen
                     FROM employee AS e
                     LEFT JOIN attendance AS a on a.employee_id = e.id AND a.date_of_day = "{date}"
                     
                     """
         return pd.read_sql_query(query , self.conn)
-    def delete_employee(self , employee_id:int):
-        c = self.conn.cursor()
-        c.execute("DELETE FROM employee WHERE id = ?", (employee_id,))
-        self.conn.commit()
+    def delete_employee_by_id(self , employee_id:str) -> bool:
+            """Deletes an employee from the database based on their ID.
+
+            Args:
+                employee_id (str): The ID of the employee to be deleted.
+            """
+            c = self.conn.cursor()
+            c.execute("DELETE FROM employee WHERE id = ?", (employee_id,))
+            self.conn.commit()
+            return c.rowcount > 0
     def close_connection(self):
         """
         Close the connection to the database.

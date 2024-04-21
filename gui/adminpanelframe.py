@@ -16,16 +16,12 @@ class adminPanelPage(tk.Frame):
         tk.Frame.__init__(self, parent)
         self.controller = controller  # Store the controller for later use
         ### section: Frame Title
-        title_label = tk.Label(self, text="Admin Panel")
-        title_label.pack(fill="x")
-        ttk.Separator(self, orient="horizontal").pack(fill="x")
-        vertical_space = tk.Label(self, height=3)
-        vertical_space.pack()
+        self.write_title("Admin Panel")
+        self.vertical_spacing()
         # Section: Register new employee
+        self.write_title("Register new employee:")
         self.photo_path = tk.StringVar()  # Variable to store the photo path
         self.name = tk.StringVar()  # Variable to store the name
-        register_label = tk.Label(self, text="Register new employee:")
-        register_label.pack()
         name_label = tk.Label(self, text="Name:")
         name_label.pack()
         name_entry = tk.Entry(self, textvariable=self.name)
@@ -36,16 +32,57 @@ class adminPanelPage(tk.Frame):
         self.register_button.pack()
         path_label = tk.Label(self, textvariable=self.photo_path)
         path_label.pack()
-        ttk.Separator(self, orient="horizontal").pack(fill="x")
-        
+        self.vertical_spacing()
         # Section: Export Attendance
+        self.write_title("Export Attendance:")
         self.date_entry = calendar(self)
         self.date_entry.pack()
         export_button = tk.Button(self, text="Export Attendance", command=self.get_attendance)
         export_button.pack()
+        self.vertical_spacing()
+        # Section: Get employee attendance
+        self.write_title("Get Employee Attendance:")
+        # add a text box to write the id
+        self.get_attendance_id = tk.StringVar()
+        get_attendance_label = tk.Label(self, text="Emoplyee's ID:")
+        get_attendance_label.pack()
+        get_attendance_entry = tk.Entry(self, textvariable=self.get_attendance_id)
+        get_attendance_entry.pack()
+        self.get_attendance_button = tk.Button(self, text="Get Attendance", command=None)
+        self.vertical_spacing()
+        # Section: Delete employee by ID
+        self.write_title("Delete Employee:")
+        delete_label = tk.Label(self, text="Delete employee by ID:")
+        delete_label.pack()
+        self.delete_id = tk.StringVar()
+        delete_entry = tk.Entry(self, textvariable=self.delete_id)
+        delete_entry.pack()
+        delete_button = tk.Button(self, text="Delete", command=self.delete_employee)
+        delete_button.pack()
+        self.vertical_spacing()
+        
+        # Section: Return to menu
+        ttk.Separator(self, orient="horizontal").pack(fill="x")
         return_button = tk.Button(self, text="Return to Menu", command=self.return_to_menu)
         return_button.pack()
-        
+    def write_title(self ,title:str):
+        title_label = tk.Label(self, text=title)
+        title_label.pack(fill="x")
+        ttk.Separator(self, orient="horizontal").pack(fill="x")
+    def vertical_spacing(self):
+        vertical_space = tk.Label(self, height=1)
+        vertical_space.pack()
+    def delete_employee(self):
+        employee_id = self.delete_id.get()
+        if not employee_id:
+            messagebox.showinfo("Error", "Please enter the employee ID.")
+            return
+        successful = self.controller.db.delete_employee_by_id(employee_id)
+        if successful:
+            messagebox.showinfo("Success", f"Deleted employee with ID: {employee_id}")
+        else:
+            messagebox.showinfo("Error", f"No employee found with ID: {employee_id}")
+        self.delete_id.set('')       
     def browse(self):
         self.photo_path.set(filedialog.askopenfilename(
             filetypes=[
@@ -72,13 +109,19 @@ class adminPanelPage(tk.Frame):
                 return
             embedding = embedding[0]["embedding"]
             str_embedding = ut.np_ndarrray_to_str(embedding)
-            self.controller.recording_page.db.add_user(name, str_embedding)
-            print(f"Registered photo: {photo_path}, name: {name}")
+            successful =  self.controller.db.add_user(name, str_embedding)
+            if not successful:
+                messagebox.showinfo("Error", "An error occurred while registering the employee.")
+                self.register_button.config(state="normal")
+                return
+            else:
+                messagebox.showinfo("Success", f"Employee {name}: with photo {photo_path},was successfully registered.")
+                print(f"Registered photo: {photo_path}, name: {name}")
             self.photo_path.set('')
             self.register_button.config(state="normal")
     def get_attendance(self):
         date = str(self.date_entry.get_date())
-        attendance = self.controller.recording_page.db.get_employees_attendance_by_date(date)
+        attendance = self.controller.db.get_employees_attendance_by_date(date)
         date_for_path = date.replace("-" , ".")
         csv_path = filedialog.asksaveasfilename(defaultextension=".csv", filetypes=[("CSV files", "*.csv")], initialfile=f"attendance_{date_for_path}")
         attendance.to_csv(csv_path, index=False)

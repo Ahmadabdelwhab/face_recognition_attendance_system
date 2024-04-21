@@ -7,10 +7,9 @@ import os
 import sys
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from utils import processing as ut
-from utils.facesdb import FacesDB
 from dotenv import load_dotenv
 load_dotenv()
-DATABASE_URL = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'database', 'face_recognition.db'))
+
 
 class RecordingPage(tk.Frame):
     def __init__(self, parent, controller):
@@ -25,8 +24,7 @@ class RecordingPage(tk.Frame):
         self.button2 = tk.Button(self, text="Back to Home",
                             command=self.stop_recording_and_go_home)
         self.button2.pack()
-        self.db = FacesDB(DATABASE_URL)  # Create a new database connection
-        db_employees = self.db.get_employees()
+        db_employees = self.controller.db.get_employees()
         self.employees = ut.load_employees(db_employees)
 
     def start_recording(self):
@@ -57,7 +55,7 @@ class RecordingPage(tk.Frame):
             processed_frame , employees_ids = ut.process_frame(frame , self.employees)
             if employees_ids:
                 for employee_id in employees_ids:
-                    self.db.add_attendance(employee_id)
+                    self.controller.db.add_attendance(employee_id)
                     print(f"Employee with ID {employee_id} has been recognized.")
             rgb_image = cv2.cvtColor(processed_frame, cv2.COLOR_BGR2RGB)
             pil_img = Image.fromarray(rgb_image)
