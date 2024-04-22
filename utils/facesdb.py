@@ -1,6 +1,7 @@
 import sqlite3
 from typing import List, Tuple ,Dict , Any # type: ignore
 import pandas as pd
+import os
 class FacesDB:
     def __init__(self , db_path:str):
         self.conn = sqlite3.connect(db_path , check_same_thread=False)
@@ -173,6 +174,23 @@ class FacesDB:
             None
         """
         self.conn.close()
+    def reset_db(self , db_path:str):
+        """
+        Reset the database by deleting all records in the 'attendance' table.
+
+        Args:
+            connection (sqlite3.Connection): The connection to the SQLite database.
+
+        Returns:
+            None
+        """
+        if os.path.exists(db_path):
+            os.remove(db_path)
+        self.__init__(db_path)
+        self.create_employee_table()
+        self.create_attendance_table()
+        self.conn.commit()
+        self.close_connection()
 def main():
     pass
 if __name__ == "__main__":
