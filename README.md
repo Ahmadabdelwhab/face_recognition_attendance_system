@@ -18,6 +18,7 @@ using cv techniques to register the employees and take the attendance
       - [processing](#processing)
       - [facedb](#facedb)
       - [resetdb](#resetdb)
+    - [database](#database)
   - [Usage](#usage)
   - [License](#license)
 
@@ -140,7 +141,8 @@ This file needs to run with high privilege
 
 in `windows` you will need to `run as administrator`
 
-
+### database
+the folder where the database file lies
 ## Usage 
 
 Run the `main.py` file
