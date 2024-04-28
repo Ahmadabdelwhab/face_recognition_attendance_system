@@ -107,6 +107,7 @@ Pre-processing Functions:
 
 `str_to_np_ndarray`: Converts a string representation of a list to a NumPy ndarray.
 load_employees: Loads employees' information into a dictionary, including their ID, name, and embedding.
+
 `np_ndarrray_to_str`: Converts a NumPy ndarray to a string representation.
 Face Recognition Functions:
 
