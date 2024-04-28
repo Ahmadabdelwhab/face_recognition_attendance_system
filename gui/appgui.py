@@ -29,7 +29,9 @@ class MainApplication(tk.Tk):
         self.current_frame.pack_forget()
         self.current_frame = self.admin_page
         self.current_frame.pack()
-
+    def close_app(self):
+        self.db.close_connection()
+        self.destroy()
 if __name__ == "__main__":
     app = MainApplication()
     app.mainloop()

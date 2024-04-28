@@ -13,8 +13,5 @@ class StartPage(tk.Frame):
         button2 = tk.Button(self, text="adminPage",
                             command=lambda: controller.show_admin_page())
         button2.pack()
-        exit_button = tk.Button(self, text="Exit", command=self.exit_app)
+        exit_button = tk.Button(self, text="Exit", command=self.controller.close_app)
         exit_button.pack()
-    def exit_app(self):
-        self.controller.recording_page.db.close_connection()  # Close the database connection
-        self.quit() 
