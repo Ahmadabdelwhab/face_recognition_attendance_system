@@ -109,7 +109,11 @@ Pre-processing Functions:
 load_employees: Loads employees' information into a dictionary, including their ID, name, and embedding.
 
 `np_ndarrray_to_str`: Converts a NumPy ndarray to a string representation.
+
+<hr>
+
 Face Recognition Functions:
+
 
 `get_embeddings`: Extracts facial embeddings from a given frame using a specified model.
 
